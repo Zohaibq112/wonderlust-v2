@@ -30,7 +30,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script {
-                    code_checkout("https://github.com/Zohaibq112/wonderlust.git","main")
+                    code_checkout("https://github.com/Zohaibq112/wonderlust-v2.git","main")
                 }
             }
         }
@@ -107,7 +107,7 @@ pipeline {
                             git diff --cached --quiet && echo "No changes to commit" || git commit -m "Updated Docker image tags to latest version"
 
                             echo "Pushing changes to GitHub:"
-                            git push https://github.com/Zohaibq112/wonderlust.git HEAD:main || echo "Nothing new to push"
+                            git push https://github.com/Zohaibq112/wonderlust-v2.git HEAD:main || echo "Nothing new to push"
                         '''
                     }
                 }
