@@ -124,17 +124,27 @@ pipeline {
                         )
                     ]) {
                         sh """
-                            echo "Copying docker-compose file to EC2..."
+                            echo "Copying files to EC2..."
                             scp -i \$SSH_KEY \
                                 -o StrictHostKeyChecking=no \
                                 docker-compose.yml \
                                 ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/
 
+                            scp -i \$SSH_KEY \
+                                -o StrictHostKeyChecking=no \
+                                backend/.env.docker \
+                                ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/backend.env.docker
+
+                            scp -i \$SSH_KEY \
+                                -o StrictHostKeyChecking=no \
+                                frontend/.env.docker \
+                                ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/frontend.env.docker
+
                             echo "Deploying application on EC2..."
                             ssh -i \$SSH_KEY \
                                 -o StrictHostKeyChecking=no \
                                 ubuntu@${env.EC2_PUBLIC_IP} '
-                                    echo "Pulling latest Docker images..."
+                                    cd /home/ubuntu
                                     docker-compose down || true
                                     docker-compose pull
                                     docker-compose up -d
