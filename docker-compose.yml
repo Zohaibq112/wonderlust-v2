@@ -10,7 +10,7 @@ services:
 
   backend:
     container_name: backend
-    image: trainwithshubham/wanderlust-backend-beta:latest
+    image: zohaib112/wanderlust-backend-beta:latest
     env_file:
       - ./backend.env.docker
     ports:
@@ -20,7 +20,7 @@ services:
 
   frontend:
     container_name: frontend
-    image: trainwithshubham/wanderlust-frontend-beta:latest
+    image: zohaib112/wanderlust-frontend-beta:latest
     env_file:
       - ./frontend.env.docker
     ports:
