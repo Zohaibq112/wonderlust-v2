@@ -34,7 +34,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script {
-                    code_checkout("https://github.com/Zohaibq112/wonderlust-v2.git","main")
+                    code_checkout("https://github.com/Zohaibq112/wonderlust-v2-v2.git","main")
                 }
             }
         }
