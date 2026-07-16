@@ -34,7 +34,20 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script {
-                    code_checkout("https://github.com/Zohaibq112/wonderlust-v2-v2.git","main")
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: '*/main']],
+                        extensions: [[
+                            $class: 'CloneOption',
+                            shallow: true,
+                            depth: 1,
+                            timeout: 30
+                        ]],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/Zohaibq112/wonderlust.git',
+                            credentialsId: 'Github-cred'
+                        ]]
+                    ])
                 }
             }
         }
