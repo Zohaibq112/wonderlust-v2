@@ -105,7 +105,7 @@
             "instance_type": "t3.micro",
             "ipv6_address_count": 0,
             "ipv6_addresses": [],
-            "key_name": "terra-automate-key-v2",
+            "key_name": "terra-automate-key",
             "launch_template": [],
             "maintenance_options": [
               {
@@ -156,7 +156,7 @@
             ],
             "secondary_private_ips": [],
             "security_groups": [
-              "allow TLS-v2"
+              "allow TLS"
             ],
             "source_dest_check": true,
             "spot_instance_request_id": "",
@@ -197,10 +197,10 @@
         {
           "schema_version": 1,
           "attributes": {
-            "arn": "arn:aws:ec2:us-east-1:615296307951:key-pair/terra-automate-key-v2",
+            "arn": "arn:aws:ec2:us-east-1:615296307951:key-pair/terra-automate-key",
             "fingerprint": "37:a7:34:03:3a:da:0d:c3:5a:44:07:85:ef:39:c5:56",
-            "id": "terra-automate-key-v2",
-            "key_name": "terra-automate-key-v2",
+            "id": "terra-automate-key",
+            "key_name": "terra-automate-key",
             "key_name_prefix": "",
             "key_pair_id": "key-0a54f45654ad48095",
             "key_type": "rsa",
@@ -321,7 +321,7 @@
                 "to_port": 9000
               }
             ],
-            "name": "allow TLS-v2",
+            "name": "allow TLS",
             "name_prefix": "",
             "owner_id": "615296307951",
             "revoke_rules_on_delete": false,
