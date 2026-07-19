@@ -44,7 +44,7 @@ pipeline {
                             timeout: 30
                         ]],
                         userRemoteConfigs: [[
-                            url: 'https://github.com/Zohaibq112/wonderlust.git',
+                            url: 'https://github.com/Zohaibq112/wonderlust-v2.git',
                             credentialsId: 'Github-cred'
                         ]]
                     ])

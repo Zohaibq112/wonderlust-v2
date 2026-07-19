@@ -3,8 +3,8 @@ pipeline {
     agent any
     
     parameters {
-        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Frontend Docker tag of the image built by the CI job')
-        string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Backend Docker tag of the image built by the CI job')
+        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Frontend Docker tag')
+        string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Backend Docker tag')
     }
 
     stages {
@@ -35,32 +35,11 @@ pipeline {
             }
         }
 
-        stage('Terraform: Provision EC2') {
+        stage('Set EC2 Public IP') {
             steps {
                 script {
-                    dir('terraform') {
-                        terraform_action("apply")
-                    }
-                }
-            }
-        }
-
-        stage('Get EC2 Public IP') {
-            steps {
-                script {
-                    dir('terraform') {
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                                          credentialsId: 'AWS-cred',
-                                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                            def ec2Ip = sh(
-                                script: "terraform output -raw instance_public_ip",
-                                returnStdout: true
-                            ).trim()
-                            echo "EC2 Instance IP: ${ec2Ip}"
-                            env.EC2_PUBLIC_IP = ec2Ip
-                        }
-                    }
+                    env.EC2_PUBLIC_IP = "44.220.157.209"
+                    echo "Deploying to EC2: ${env.EC2_PUBLIC_IP}"
                 }
             }
         }
@@ -92,22 +71,17 @@ pipeline {
             }
         }
         
-       stage("Git: Code update and push to GitHub") {
+        stage("Git: Code update and push to GitHub") {
             steps {
                 script {
                     withCredentials([gitUsernamePassword(credentialsId: 'Github-cred', gitToolName: 'Default')]) {
                         sh '''
-                            echo "Checking repository status:"
+                            git config user.email "zohaibqazi941@gmail.com"
+                            git config user.name "Zohaibq112"
                             git status
-
-                            echo "Adding changes to git:"
                             git add .
-
-                            echo "Committing changes:"
                             git diff --cached --quiet && echo "No changes to commit" || git commit -m "Updated Docker image tags to latest version"
-
-                            echo "Pushing changes to GitHub:"
-                            git push https://github.com/Zohaibq112/wonderlust-v2.git HEAD:main || echo "Nothing new to push"
+                            git push https://github.com/Zohaibq112/wonderlust-v2.git HEAD:main || echo "Nothing to push"
                         '''
                     }
                 }
@@ -117,65 +91,55 @@ pipeline {
         stage('Deploy: Copy files to EC2') {
             steps {
                 script {
-                    withCredentials([
-                        sshUserPrivateKey(
-                            credentialsId: 'EC2-SSH-PRIVATE-KEY',
-                            keyFileVariable: 'SSH_KEY'
-                        )
-                    ]) {
-                        sh """
-                            echo "Copying files to EC2..."
-                            scp -i \$SSH_KEY \
-                                -o StrictHostKeyChecking=no \
-                                docker-compose.yml \
-                                ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/
+                    sh """
+                        echo "Copying files to EC2..."
+                        
+                        scp -i /var/jenkins_home/.ssh/terra-key \
+                            -o StrictHostKeyChecking=no \
+                            -o IdentitiesOnly=yes \
+                            docker-compose.yml \
+                            ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/
 
-                            scp -i \$SSH_KEY \
-                                -o StrictHostKeyChecking=no \
-                                backend/.env.docker \
-                                ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/backend.env.docker
+                        scp -i /var/jenkins_home/.ssh/terra-key \
+                            -o StrictHostKeyChecking=no \
+                            -o IdentitiesOnly=yes \
+                            backend/.env.docker \
+                            ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/backend.env.docker
 
-                            scp -i \$SSH_KEY \
-                                -o StrictHostKeyChecking=no \
-                                frontend/.env.docker \
-                                ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/frontend.env.docker
+                        scp -i /var/jenkins_home/.ssh/terra-key \
+                            -o StrictHostKeyChecking=no \
+                            -o IdentitiesOnly=yes \
+                            frontend/.env.docker \
+                            ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/frontend.env.docker
 
-                            echo "Deploying application on EC2..."
-                            ssh -i \$SSH_KEY \
-                                -o StrictHostKeyChecking=no \
-                                ubuntu@${env.EC2_PUBLIC_IP} '
-                                    cd /home/ubuntu
-                                    docker-compose down || true
-                                    docker-compose pull
-                                    docker-compose up -d
-                                    echo "Deployment complete!"
-                                    docker ps
-                                '
-                        """
-                    }
+                        echo "Deploying application on EC2..."
+                        ssh -i /var/jenkins_home/.ssh/terra-key \
+                            -o StrictHostKeyChecking=no \
+                            -o IdentitiesOnly=yes \
+                            ubuntu@${env.EC2_PUBLIC_IP} '
+                                cd /home/ubuntu
+                                sudo docker-compose down || true
+                                sudo docker-compose pull
+                                sudo docker-compose up -d
+                                echo "Deployment complete!"
+                                docker ps
+                            '
+                    """
                 }
             }
         }
-
         stage('Verify: Application is running') {
             steps {
                 script {
-                    withCredentials([
-                        sshUserPrivateKey(
-                            credentialsId: 'EC2-SSH-PRIVATE-KEY',
-                            keyFileVariable: 'SSH_KEY'
-                        )
-                    ]) {
-                        sh """
-                            ssh -i \$SSH_KEY \
-                                -o StrictHostKeyChecking=no \
-                                ubuntu@${env.EC2_PUBLIC_IP} '
-                                    echo "Running containers:"
-                                    docker ps
-                                    echo "Application URL: http://${env.EC2_PUBLIC_IP}:3000"
-                                '
-                        """
-                    }
+                    sh """
+                        ssh -i /var/jenkins_home/.ssh/terra-key \
+                            -o StrictHostKeyChecking=no \
+                            ubuntu@${env.EC2_PUBLIC_IP} '
+                                echo "Running containers:"
+                                docker ps
+                                echo "Application URL: http://${env.EC2_PUBLIC_IP}:5173"
+                            '
+                    """
                 }
             }
         }
@@ -186,10 +150,13 @@ pipeline {
             script {
                 emailext attachLog: true,
                 from: 'zohaibqazi941@gmail.com',
-                subject: "Wanderlust Application Deployed Successfully - '${currentBuild.result}'",
+                subject: "Wanderlust Deployed Successfully - Build #${env.BUILD_NUMBER}",
                 body: """
                     <html>
                     <body>
+                        <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">✅ Deployment Successful!</p>
+                        </div>
                         <div style="background-color: #FFA07A; padding: 10px; margin-bottom: 10px;">
                             <p style="color: black; font-weight: bold;">Project: ${env.JOB_NAME}</p>
                         </div>
@@ -197,10 +164,7 @@ pipeline {
                             <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
                         </div>
                         <div style="background-color: #87CEEB; padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">Build URL: ${env.BUILD_URL}</p>
-                        </div>
-                        <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">Application URL: http://${env.EC2_PUBLIC_IP}:3000</p>
+                            <p style="color: black; font-weight: bold;">Application URL: http://44.220.157.209:5173</p>
                         </div>
                     </body>
                     </html>
@@ -213,12 +177,12 @@ pipeline {
             script {
                 emailext attachLog: true,
                 from: 'zohaibqazi941@gmail.com',
-                subject: "Wanderlust CD Pipeline Failed - '${currentBuild.result}'",
+                subject: "Wanderlust CD Failed - Build #${env.BUILD_NUMBER}",
                 body: """
                     <html>
                     <body>
                         <div style="background-color: #FF6347; padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">CD Pipeline Failed</p>
+                            <p style="color: black; font-weight: bold;">❌ CD Pipeline Failed</p>
                         </div>
                         <div style="background-color: #FFA07A; padding: 10px; margin-bottom: 10px;">
                             <p style="color: black; font-weight: bold;">Project: ${env.JOB_NAME}</p>

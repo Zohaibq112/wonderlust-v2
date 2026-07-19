@@ -43,9 +43,9 @@ resource "aws_security_group" "allow_user_to_connect" {
   }
 
   ingress {
-    description = "Frontend App"
-    from_port   = 3000
-    to_port     = 3000
+    description = "Frontend Vite"
+    from_port   = 5173
+    to_port     = 5173
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

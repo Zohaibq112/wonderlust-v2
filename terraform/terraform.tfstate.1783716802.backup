@@ -59,7 +59,7 @@
           "schema_version": 1,
           "attributes": {
             "ami": "ami-0e86e20dae9224db8",
-            "arn": "arn:aws:ec2:us-east-1:615296307951:instance/i-030d955b7bc053de6",
+            "arn": "arn:aws:ec2:us-east-1:615296307951:instance/i-000420b3cf228d165",
             "associate_public_ip_address": true,
             "availability_zone": "us-east-1c",
             "capacity_reservation_specification": [
@@ -97,7 +97,7 @@
             "host_id": "",
             "host_resource_group_arn": null,
             "iam_instance_profile": "",
-            "id": "i-030d955b7bc053de6",
+            "id": "i-000420b3cf228d165",
             "instance_initiated_shutdown_behavior": "stop",
             "instance_lifecycle": "",
             "instance_market_options": [],
