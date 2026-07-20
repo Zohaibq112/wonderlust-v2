@@ -35,11 +35,11 @@ pipeline {
             }
         }
 
-        stage('Set EC2 Public IP') {
+        stage('Set EC2 IP') {
             steps {
                 script {
-                    env.EC2_PUBLIC_IP = "54.89.157.241"
-                    echo "Deploying to EC2: ${env.EC2_PUBLIC_IP}"
+                    env.EC2_PUBLIC_IP = "3.239.118.153"
+                    echo "Deploying to: ${env.EC2_PUBLIC_IP}"
                 }
             }
         }
@@ -49,7 +49,6 @@ pipeline {
                 script {
                     echo "FRONTEND_DOCKER_TAG: ${params.FRONTEND_DOCKER_TAG}"
                     echo "BACKEND_DOCKER_TAG: ${params.BACKEND_DOCKER_TAG}"
-                    echo "Deploying to EC2: ${env.EC2_PUBLIC_IP}"
                 }
             }
         }
@@ -93,7 +92,6 @@ pipeline {
                 script {
                     sh """
                         echo "Copying files to EC2..."
-                        
                         scp -i /var/jenkins_home/.ssh/terra-key \
                             -o StrictHostKeyChecking=no \
                             -o IdentitiesOnly=yes \
@@ -112,7 +110,7 @@ pipeline {
                             frontend/.env.docker \
                             ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/frontend.env.docker
 
-                        echo "Deploying application on EC2..."
+                        echo "Deploying application..."
                         ssh -i /var/jenkins_home/.ssh/terra-key \
                             -o StrictHostKeyChecking=no \
                             -o IdentitiesOnly=yes \
@@ -128,12 +126,14 @@ pipeline {
                 }
             }
         }
+
         stage('Verify: Application is running') {
             steps {
                 script {
                     sh """
                         ssh -i /var/jenkins_home/.ssh/terra-key \
                             -o StrictHostKeyChecking=no \
+                            -o IdentitiesOnly=yes \
                             ubuntu@${env.EC2_PUBLIC_IP} '
                                 echo "Running containers:"
                                 docker ps
@@ -164,7 +164,7 @@ pipeline {
                             <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
                         </div>
                         <div style="background-color: #87CEEB; padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">Application URL: http://54.89.157.241:5173</p>
+                            <p style="color: black; font-weight: bold;">Application URL: http://3.239.118.153:5173</p>
                         </div>
                     </body>
                     </html>
