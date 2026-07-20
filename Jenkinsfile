@@ -38,7 +38,7 @@ pipeline {
         stage('Set EC2 IP') {
             steps {
                 script {
-                    env.EC2_PUBLIC_IP = "3.239.118.153"
+                    env.EC2_PUBLIC_IP = "44.200.44.62"
                     echo "Deploying to: ${env.EC2_PUBLIC_IP}"
                 }
             }
@@ -164,7 +164,7 @@ pipeline {
                             <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
                         </div>
                         <div style="background-color: #87CEEB; padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">Application URL: http://3.239.118.153:5173</p>
+                            <p style="color: black; font-weight: bold;">Application URL: http://44.200.44.62:5173</p>
                         </div>
                     </body>
                     </html>
