@@ -1,93 +1,59 @@
+# SSH Key Pair
 resource "aws_key_pair" "deployer" {
-  key_name   = "terra-automate-key"
+  key_name   = "wanderlust-key"
   public_key = var.public_key
 }
 
-resource "aws_default_vpc" "default" {}
-
-resource "aws_security_group" "allow_user_to_connect" {
-  name        = "allow TLS"
-  description = "Allow user to connect"
-  vpc_id      = aws_default_vpc.default.id
-
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "HTTPS"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "SonarQube"
-    from_port   = 9000
-    to_port     = 9000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "Frontend Vite"
-    from_port   = 5173
-    to_port     = 5173
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "Backend App"
-    from_port   = 5000
-    to_port     = 5000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    description = "Allow all outgoing traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+# Bastion Host (public subnet - for SSH access)
+resource "aws_instance" "bastion" {
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  key_name               = aws_key_pair.deployer.key_name
+  subnet_id              = aws_subnet.public_subnet.id
+  vpc_security_group_ids = [aws_security_group.public_sg.id]
 
   tags = {
-    Name = "mysecurity"
-  }
-}
-
-resource "aws_instance" "testinstance" {
-  ami             = var.ami_id
-  instance_type   = var.instance_type
-  key_name        = aws_key_pair.deployer.key_name
-  security_groups = [aws_security_group.allow_user_to_connect.name]
-
-  tags = {
-    Name = "Automate"
+    Name = "wanderlust-bastion"
   }
 
   root_block_device {
-    volume_size = 30
+    volume_size = 20
     volume_type = "gp3"
   }
 }
 
-output "instance_public_ip" {
-  description = "Public IP of the EC2 instance"
-  value       = aws_instance.testinstance.public_ip
+# Frontend EC2 (public subnet)
+resource "aws_instance" "frontend" {
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  key_name               = aws_key_pair.deployer.key_name
+  subnet_id              = aws_subnet.public_subnet.id
+  vpc_security_group_ids = [aws_security_group.public_sg.id]
+
+  tags = {
+    Name = "wanderlust-frontend"
+  }
+
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
+}
+
+# Backend EC2 (private subnet)
+resource "aws_instance" "backend" {
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  key_name               = aws_key_pair.deployer.key_name
+  subnet_id              = aws_subnet.private_subnet.id
+  vpc_security_group_ids = [aws_security_group.private_sg.id]
+
+  tags = {
+    Name = "wanderlust-backend"
+  }
+
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
 }

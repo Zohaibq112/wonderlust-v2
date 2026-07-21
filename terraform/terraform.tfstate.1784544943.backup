@@ -1,0 +1,75 @@
+{
+  "version": 4,
+  "terraform_version": "1.14.5",
+  "serial": 27,
+  "lineage": "dbc4c8e2-f351-7808-1c83-cb1df0c4ed89",
+  "outputs": {},
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "aws_default_vpc",
+      "name": "default",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:us-east-1:615296307951:vpc/vpc-0a74d59f829e67b9f",
+            "assign_generated_ipv6_cidr_block": false,
+            "cidr_block": "172.31.0.0/16",
+            "default_network_acl_id": "acl-047ba2a0d397056fd",
+            "default_route_table_id": "rtb-04f9963234e4cf1c0",
+            "default_security_group_id": "sg-04913bc027f6fbba9",
+            "dhcp_options_id": "dopt-0068f892d61f0586f",
+            "enable_dns_hostnames": true,
+            "enable_dns_support": true,
+            "enable_network_address_usage_metrics": false,
+            "existing_default_vpc": true,
+            "force_destroy": false,
+            "id": "vpc-0a74d59f829e67b9f",
+            "instance_tenancy": "default",
+            "ipv6_association_id": "",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_network_border_group": "",
+            "ipv6_ipam_pool_id": "",
+            "ipv6_netmask_length": 0,
+            "main_route_table_id": "rtb-04f9963234e4cf1c0",
+            "owner_id": "615296307951",
+            "tags": {},
+            "tags_all": {}
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_key_pair",
+      "name": "deployer",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:us-east-1:615296307951:key-pair/terra-automate-key",
+            "fingerprint": "37:a7:34:03:3a:da:0d:c3:5a:44:07:85:ef:39:c5:56",
+            "id": "terra-automate-key",
+            "key_name": "terra-automate-key",
+            "key_name_prefix": "",
+            "key_pair_id": "key-0ae4ad1f3fd7908d1",
+            "key_type": "rsa",
+            "public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCfXOzTmJlfEwkTDqrjm9ivSaraO3dX29u/czhQGhdW/KEc6T6x25ZRSVuZM//nS5rhRLGrwzP9U1MpIBBWgiF1EDmVRpoYxHKdWehkQFl0SRoOkd4ofckV9qASFhU0OLW+CldnTEF7n6K6fHpRMxyujMe+UOFIRSDIpa4PcQhs8GBOt4ALY2N+hTQa8+Huj7d9QhOnK5Rifo9QDpyxk3L6Mpi80oUseq4m0hyKAsYtF6ZOSU8RESgrk2BegS3VhbLCTr8SVc9UlR5qk2GJpCMw1f8lRcU4sFsbWOHye2IXHDPT4+xu3popqZO5f30rX65c25Wqo3CeN44aXcKMSuaGFGHd2b/IR+LLAxbQM2vSHigdMs2BXlbXQEXbCKYwQBDb6ooCtVvM88GUt4/avyjLTxfmwSyKrTnrQXgFGfmy3WY8FatfAd6HpDmQ21pQqYxzRZHzYP9q5mr/Evze7vRacBs8q62/N0HbYrl4+FO6sFBJsqxTM26uEYoEoiYBbISiaiXOLx4qZbzNcSJtBpz9bQMg1NYF2jd/er0e1QmTYZiU+/dOvQKIVO42DyaKO3ZnbhdueD5NTqGtVB3zgsn0XPVm+g5gzQvT+B8nMwpvboUbZt3RWTVFqZLjBYN+q1SJVqdaNfXM6f4BMCBlpxWy5ilBrdHMvEUeEZDoVfkLvQ== hp@DESKTOP-H2P26TK",
+            "tags": {},
+            "tags_all": {}
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ=="
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}
