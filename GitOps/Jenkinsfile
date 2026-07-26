@@ -90,7 +90,7 @@ pipeline {
                     steps {
                         script {
                             dir("Automations") {
-                                sh "bash updatebackendnew.sh"
+                                sh "bash updatebackendnew.sh || echo 'Skipped'"
                             }
                         }
                     }
@@ -99,7 +99,7 @@ pipeline {
                     steps {
                         script {
                             dir("Automations") {
-                                sh "bash updatefrontendnew.sh"
+                                sh "bash updatefrontendnew.sh || echo 'Skipped'"
                             }
                         }
                     }
