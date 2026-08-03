@@ -35,24 +35,6 @@ pipeline {
             }
         }
 
-        stage('Set EC2 IP') {
-            steps {
-                script {
-                    env.EC2_PUBLIC_IP = "44.200.44.62"
-                    echo "Deploying to: ${env.EC2_PUBLIC_IP}"
-                }
-            }
-        }
-        
-        stage('Verify: Docker Image Tags') {
-            steps {
-                script {
-                    echo "FRONTEND_DOCKER_TAG: ${params.FRONTEND_DOCKER_TAG}"
-                    echo "BACKEND_DOCKER_TAG: ${params.BACKEND_DOCKER_TAG}"
-                }
-            }
-        }
-
         stage("Update: Kubernetes manifests") {
             steps {
                 script {
@@ -70,7 +52,7 @@ pipeline {
             }
         }
         
-        stage("Git: Code update and push to GitHub") {
+        stage("Git: Push updated manifests") {
             steps {
                 script {
                     withCredentials([gitUsernamePassword(credentialsId: 'Github-cred', gitToolName: 'Default')]) {
@@ -87,59 +69,14 @@ pipeline {
             }
         }
 
-        stage('Deploy: Copy files to EC2') {
+        stage("ArgoCD: Sync triggered via Git") {
             steps {
                 script {
-                    sh """
-                        echo "Copying files to EC2..."
-                        scp -i /var/jenkins_home/.ssh/terra-key \
-                            -o StrictHostKeyChecking=no \
-                            -o IdentitiesOnly=yes \
-                            docker-compose.yml \
-                            ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/
-
-                        scp -i /var/jenkins_home/.ssh/terra-key \
-                            -o StrictHostKeyChecking=no \
-                            -o IdentitiesOnly=yes \
-                            backend/.env.docker \
-                            ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/backend.env.docker
-
-                        scp -i /var/jenkins_home/.ssh/terra-key \
-                            -o StrictHostKeyChecking=no \
-                            -o IdentitiesOnly=yes \
-                            frontend/.env.docker \
-                            ubuntu@${env.EC2_PUBLIC_IP}:/home/ubuntu/frontend.env.docker
-
-                        echo "Deploying application..."
-                        ssh -i /var/jenkins_home/.ssh/terra-key \
-                            -o StrictHostKeyChecking=no \
-                            -o IdentitiesOnly=yes \
-                            ubuntu@${env.EC2_PUBLIC_IP} '
-                                cd /home/ubuntu
-                                sudo docker-compose down || true
-                                sudo docker-compose pull
-                                sudo docker-compose up -d
-                                echo "Deployment complete!"
-                                docker ps
-                            '
-                    """
-                }
-            }
-        }
-
-        stage('Verify: Application is running') {
-            steps {
-                script {
-                    sh """
-                        ssh -i /var/jenkins_home/.ssh/terra-key \
-                            -o StrictHostKeyChecking=no \
-                            -o IdentitiesOnly=yes \
-                            ubuntu@${env.EC2_PUBLIC_IP} '
-                                echo "Running containers:"
-                                docker ps
-                                echo "Application URL: http://${env.EC2_PUBLIC_IP}:5173"
-                            '
-                    """
+                    echo "✅ Manifests pushed to GitHub"
+                    echo "✅ ArgoCD will detect change and trigger canary deployment"
+                    echo "✅ Argo Rollouts will gradually shift traffic"
+                    echo "Frontend: 10% → 30% → 60% → 100%"
+                    echo "Backend:  10% → 30% → 60% → 100%"
                 }
             }
         }
@@ -150,21 +87,21 @@ pipeline {
             script {
                 emailext attachLog: true,
                 from: 'zohaibqazi941@gmail.com',
-                subject: "Wanderlust Deployed Successfully - Build #${env.BUILD_NUMBER}",
+                subject: "Wanderlust CD Completed - Build #${env.BUILD_NUMBER}",
                 body: """
                     <html>
                     <body>
                         <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">✅ Deployment Successful!</p>
+                            <p style="color: black; font-weight: bold;">✅ CD Pipeline Successful!</p>
                         </div>
                         <div style="background-color: #FFA07A; padding: 10px; margin-bottom: 10px;">
                             <p style="color: black; font-weight: bold;">Project: ${env.JOB_NAME}</p>
                         </div>
                         <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
+                            <p style="color: black; font-weight: bold;">Build: ${env.BUILD_NUMBER}</p>
                         </div>
                         <div style="background-color: #87CEEB; padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">Application URL: http://44.200.44.62:5173</p>
+                            <p style="color: black; font-weight: bold;">ArgoCD is deploying via canary rollout</p>
                         </div>
                     </body>
                     </html>
@@ -188,7 +125,7 @@ pipeline {
                             <p style="color: black; font-weight: bold;">Project: ${env.JOB_NAME}</p>
                         </div>
                         <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
-                            <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
+                            <p style="color: black; font-weight: bold;">Build: ${env.BUILD_NUMBER}</p>
                         </div>
                         <div style="background-color: #87CEEB; padding: 10px; margin-bottom: 10px;">
                             <p style="color: black; font-weight: bold;">Build URL: ${env.BUILD_URL}</p>
