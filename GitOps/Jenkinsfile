@@ -130,19 +130,46 @@ pipeline {
         }
     }
 
-        post {
-            success {
-                script {
-                    try {
-                        archiveArtifacts artifacts: '*.xml', followSymlinks: false
-                    } catch(Exception e) {
-                        echo "No xml artifacts found - continuing"
-                    }
-                    build job: "Wanderlust-CD", parameters: [
-                        string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
-                        string(name: 'BACKEND_DOCKER_TAG', value: "${params.BACKEND_DOCKER_TAG}")
-                    ]
+    post {
+        success {
+            script {
+                try {
+                    archiveArtifacts artifacts: '*.xml', allowEmptyArchive: true
+                } catch(Exception e) {
+                    echo "No xml artifacts found - continuing"
                 }
             }
+            build job: "Wanderlust-CD", parameters: [
+                string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
+                string(name: 'BACKEND_DOCKER_TAG', value: "${params.BACKEND_DOCKER_TAG}")
+            ]
         }
+        failure {
+            script {
+                emailext attachLog: true,
+                from: 'zohaibqazi941@gmail.com',
+                subject: "Wanderlust CI Pipeline Failed - '${currentBuild.result}'",
+                body: """
+                    <html>
+                    <body>
+                        <div style="background-color: #FF6347; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">CI Pipeline Failed</p>
+                        </div>
+                        <div style="background-color: #FFA07A; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">Project: ${env.JOB_NAME}</p>
+                        </div>
+                        <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
+                        </div>
+                        <div style="background-color: #87CEEB; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">Build URL: ${env.BUILD_URL}</p>
+                        </div>
+                    </body>
+                    </html>
+                """,
+                to: 'qzohaib234@gmail.com',
+                mimeType: 'text/html'
+            }
+        }
+    }
 }
